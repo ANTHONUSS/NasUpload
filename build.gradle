@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+}
+
+group = 'fr.anthonus'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+
+}
+
+dependencies {
+    //gson
+    implementation 'com.google.code.gson:gson:2.13.1'
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes('Main-Class': 'fr.anthonus.Main')
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
