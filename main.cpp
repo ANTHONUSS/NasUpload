@@ -26,6 +26,7 @@ void loadSettings() {
         std::cout << "Ligne 2 (shareURL) : " << shareURL << std::endl;
     } else {
         std::cerr << "Erreur lors de l'ouverture du fichier settings.txt" << std::endl;
+        _getch();
         exit(1);
     }
 }
@@ -121,6 +122,7 @@ int main() {
 
     if (!file) {
         std::cerr << "Aucun fichier sélectionné." << std::endl;
+        _getch();
         return 1;
     }
     std::vector<std::string> files = splitFiles(file);
@@ -137,7 +139,7 @@ int main() {
     }
 
     int resultPermOrTemp = tinyfd_messageBox(
-        "NasUpload - Type d'envoi",
+        "NasUpload",
         (std::string("Voulez vous envoyer ") + (isMultiple ? "les fichiers" : "le fichier") + " de façon permanente ?").c_str(),
         "yesno",
         "question",
@@ -156,7 +158,7 @@ int main() {
     bool isInFolder = false;
     if (isMultiple) {
         int resultIsInFolder = tinyfd_messageBox(
-            "NasUpload - Type d'envoi",
+            "NasUpload",
             "Voulez vous envoyer les fichiers dans un dossier ?",
             "yesno",
             "question",
