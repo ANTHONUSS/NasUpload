@@ -59,15 +59,20 @@ std::string randomFolderName(size_t length) {
     return result;
 }
 
-std::string replaceSpaces(const std::string& input) {
-    std::string result;
-    for (char c : input) {
-        if (c == ' ')
-            result += "%20";
-        else
-            result += c;
+bool isUrlSafeChar(unsigned char c) {
+    return std::isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~' || c == '/' || c == ':';
+}
+
+std::string urlEncode(const std::string& input) {
+    std::ostringstream encoded;
+    for (unsigned char c : input) {
+        if (isUrlSafeChar(c)) {
+            encoded << c;
+        } else {
+            encoded << '%' << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << (int)c;
+        }
     }
-    return result;
+    return encoded.str();
 }
 
 void copyFileWithProgress(const std::filesystem::path& src, const std::filesystem::path& dest, int currentFileIndex, int totalFiles) {
@@ -102,6 +107,20 @@ void copyFileWithProgress(const std::filesystem::path& src, const std::filesyste
                   << std::flush;
     }
     std::cout << std::endl;
+}
+
+void copyToClipboard(const std::string& text) {
+    if (OpenClipboard(nullptr)) {
+        EmptyClipboard();
+        HGLOBAL hGlob = GlobalAlloc(GMEM_FIXED, text.size() + 1);
+        if (hGlob) {
+            memcpy(hGlob, text.c_str(), text.size() + 1);
+            SetClipboardData(CF_TEXT, hGlob);
+        }
+        CloseClipboard();
+        GlobalFree(hGlob);
+    }
+    std::cout << "Liens copiés dans le presse papier." << std::endl;
 }
 
 int main() {
@@ -185,7 +204,7 @@ int main() {
             copyFileWithProgress(src, dest, i + 1, files.size());
             std::cout << "Fichier " << src.filename() << " copié vers " << dest << std::endl;
             std::string fileURL = shareURL + (isPermanent ? "/perm/" : "/temp/") + (isInFolder ? dest.parent_path().filename().string() + "/" : "") + src.filename().string();
-            fileURL = replaceSpaces(fileURL);
+            fileURL = urlEncode(fileURL);
             generatedURLs.push_back(fileURL);
 
         } catch (const std::filesystem::filesystem_error& e) {
@@ -207,9 +226,13 @@ int main() {
     }
 
     std::cout << "Fichiers envoyés avec succès !" << std::endl;
+
+    std::string urlsText;
     for (const auto& url : generatedURLs) {
         std::cout << url << std::endl;
+        urlsText += url + "\n";
     }
+    copyToClipboard(urlsText);
 
     std::cout << "Appuyez sur une touche pour quitter..." << std::endl;
     _getch();
