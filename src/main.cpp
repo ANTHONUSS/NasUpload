@@ -190,6 +190,7 @@ int main() {
     }
 
     bool isInFolder = false;
+    std::string folderName = "";
     if (isMultiple) {
         int resultIsInFolder = tinyfd_messageBox(
             "NasUpload",
@@ -199,7 +200,8 @@ int main() {
             1
         );
         if (resultIsInFolder) {
-            choosenDir += "/" + randomName(20);
+            folderName = randomName(20);
+            choosenDir += "/" + folderName;
             isInFolder = true;
         } else {
             isInFolder = false;
@@ -223,10 +225,12 @@ int main() {
             continue;
         }
 
-        std::cout << "Fichier " << src.filename() << " copié vers " << dest << std::endl;
-        std::string fileURL = shareURL + (isPermanent ? "/perm/" : "/temp/") + (isInFolder ? dest.parent_path().filename().string() + "/" : "") + fileName;
-        fileURL = urlEncode(fileURL);
-        generatedURLs.push_back(fileURL);
+        if (!isInFolder) {
+            std::cout << "Fichier " << src.filename() << " copié vers " << dest << std::endl;
+            std::string fileURL = shareURL + (isPermanent ? "/perm/" : "/temp/") + fileName;
+            fileURL = urlEncode(fileURL);
+            generatedURLs.push_back(fileURL);
+        }
     }
 
     if (isInFolder) {
@@ -242,17 +246,22 @@ int main() {
     }
 
     std::cout << "Fichiers envoyés avec succès !" << std::endl;
-
-    std::string urlsText;
-    for (const auto& url : generatedURLs) {
-        std::cout << url << std::endl;
-        urlsText += url + "\n";
+    if (!isInFolder) {
+        std::string urlsText;
+        for (const auto &url: generatedURLs) {
+            std::cout << url << std::endl;
+            urlsText += url + "\n";
+        }
+        copyToClipboard(urlsText);
+    } else {
+        std::string folderURL = shareURL + (isPermanent ? "/perm/" : "/temp/") + folderName;
+        folderURL = urlEncode(folderURL);
+        std::cout << folderURL << std::endl;
+        copyToClipboard(folderURL);
     }
-    copyToClipboard(urlsText);
 
     std::cout << "Appuyez sur une touche pour quitter..." << std::endl;
     _getch();
-
 
     return 0;
 }
