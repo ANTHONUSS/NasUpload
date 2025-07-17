@@ -1,6 +1,6 @@
 #include <filesystem>
 #include <iostream>
-#include "../lib/tinyfiledialogs.h"
+#include "../lib/tinyFileDialogs/tinyfiledialogs.h"
 #include <fstream>
 #include <vector>
 #include <string>
