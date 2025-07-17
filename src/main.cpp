@@ -1,6 +1,6 @@
 #include <filesystem>
 #include <iostream>
-#include "lib/tinyfiledialogs.h"
+#include "../lib/tinyfiledialogs.h"
 #include <fstream>
 #include <vector>
 #include <string>
@@ -43,7 +43,7 @@ std::vector<std::string> splitFiles(const char *files) {
     return result;
 }
 
-std::string randomFolderName(size_t length) {
+std::string randomName(size_t length) {
     const std::string chars =
         "abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -144,6 +144,7 @@ int main() {
         _getch();
         return 1;
     }
+
     std::vector<std::string> files = splitFiles(file);
     bool isMultiple;
     if (files.size() > 1) {
@@ -184,7 +185,7 @@ int main() {
             1
         );
         if (resultIsInFolder) {
-            choosenDir += "/" + randomFolderName(20);
+            choosenDir += "/" + randomName(20);
             isInFolder = true;
         } else {
             isInFolder = false;

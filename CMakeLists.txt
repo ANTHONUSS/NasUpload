@@ -3,5 +3,5 @@ project(NasUpload)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(NasUpload main.cpp lib/tinyfiledialogs.c lib/tinyfiledialogs.h icon.rc)
+add_executable(NasUpload src/main.cpp lib/tinyfiledialogs.c lib/tinyfiledialogs.h resources/icon.rc)
 target_link_options(NasUpload PRIVATE -static -static-libgcc -static-libstdc++)
