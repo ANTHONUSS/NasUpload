@@ -75,7 +75,7 @@ std::string urlEncode(const std::string& input) {
     return encoded.str();
 }
 
-void copyFileWithProgress(const std::filesystem::path& src, const std::filesystem::path& dest, int currentFileIndex, int totalFiles) {
+void copyFileWithProgress(const std::filesystem::path& src, const std::filesystem::path& dest, int currentFileIndex, int totalFiles) { //ça c'est chatGPT
     std::ifstream in(src, std::ios::binary);
     std::ofstream out(dest, std::ios::binary);
     if (!in || !out) throw std::runtime_error("Erreur ouverture fichier");
@@ -175,6 +175,20 @@ int main() {
         isPermanent = false;
     }
 
+    int resultRand = tinyfd_messageBox(
+        "NasUpload",
+        (std::string("Voulez vous randomizer le nom ") + (isMultiple ? "des fichiers" : "du fichier") + " ?").c_str(),
+        "yesno",
+        "question",
+        1
+    );
+    bool isRandomized;
+    if (resultRand == 1) {
+        isRandomized = true;
+    } else {
+        isRandomized = false;
+    }
+
     bool isInFolder = false;
     if (isMultiple) {
         int resultIsInFolder = tinyfd_messageBox(
@@ -200,18 +214,19 @@ int main() {
     for (size_t i = 0; i < files.size(); ++i) {
         const auto& filePath = files[i];
         std::filesystem::path src(filePath);
-        std::filesystem::path dest = std::filesystem::path(choosenDir) / src.filename();
+        std::string fileName = isRandomized ? randomName(20) + src.extension().string() : src.filename().string();
+        std::filesystem::path dest = std::filesystem::path(choosenDir) / fileName;
         try {
             copyFileWithProgress(src, dest, i + 1, files.size());
-            std::cout << "Fichier " << src.filename() << " copié vers " << dest << std::endl;
-            std::string fileURL = shareURL + (isPermanent ? "/perm/" : "/temp/") + (isInFolder ? dest.parent_path().filename().string() + "/" : "") + src.filename().string();
-            fileURL = urlEncode(fileURL);
-            generatedURLs.push_back(fileURL);
-
         } catch (const std::filesystem::filesystem_error& e) {
             std::cerr << "Erreur lors de la copie du fichier " << src << " vers " << dest << ": " << e.what() << std::endl;
             continue;
         }
+
+        std::cout << "Fichier " << src.filename() << " copié vers " << dest << std::endl;
+        std::string fileURL = shareURL + (isPermanent ? "/perm/" : "/temp/") + (isInFolder ? dest.parent_path().filename().string() + "/" : "") + fileName;
+        fileURL = urlEncode(fileURL);
+        generatedURLs.push_back(fileURL);
     }
 
     if (isInFolder) {
